@@ -1,0 +1,38 @@
+FROM python:%%PYTHON_VERSION%% AS builder-base
+
+ENV PATH="/root/.local/bin:${PATH}"
+
+RUN apt-get update \
+    && apt-get install --no-install-recommends -y curl \
+    && curl -sSL https://install.python-poetry.org/ | POETRY_VERSION=1.2.2 python%%PYTHON_VERSION%% \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+
+FROM builder-base AS builder
+
+ARG VERSION
+ENV VERSION=${VERSION}
+
+# create and activate virtualenv
+RUN python%%PYTHON_VERSION%% -m venv /opt/venv
+ENV VIRTUAL_ENV=/opt/venv
+
+RUN mkdir -p src/responsaas && \
+    touch src/responsaas/__init__.py && \
+    touch README.md
+
+COPY ./poetry.lock ./pyproject.toml ./
+RUN pip install pip --upgrade
+RUN poetry install --with server
+
+FROM python:%%PYTHON_VERSION%% AS runner
+ENV PYTHONUNBUFFERED=1 \
+    VIRTUAL_ENV=/opt/venv \
+    PATH="/opt/venv/bin:$PATH"
+
+COPY --from=builder /opt/venv /opt/venv
+COPY ./ ./
+
+ENTRYPOINT [ "uvicorn" ]
+CMD [ "responsaas.main:app", "--port=7564", "--host=0.0.0.0" ]
