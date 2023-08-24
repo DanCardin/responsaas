@@ -1,0 +1,79 @@
+[tool.poetry]
+name = "responsaas"
+version = "0.1.0"
+description = ""
+authors = ["DanCardin <ddcardin@gmail.com>"]
+readme = "README.md"
+packages = [
+    { from = "src", include = "responsaas" },
+]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+responses = ">=0.17.0"
+fastapi = "^0.101.1"
+pydantic = "^2.2.0"
+
+pytest-mock-resources = {version = '>=2.8.0', extras = ["docker"], optional = true}
+
+[tool.poetry.extras]
+pmr = ["pytest-mock-resources"]
+
+[tool.poetry.group.server.dependencies]
+uvicorn = "*"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.7.0"
+ruff = "^0.0.284"
+coverage = ">=6"
+types-requests = "^2.31.0.2"
+mypy = "^1.5.1"
+
+[tool.ruff]
+target-version = "py38"
+
+select = ["C", "D", "E", "F", "I", "N", "Q", "RET", "RUF", "S", "T", "UP", "YTT"]
+ignore = [
+    "C901",
+    "E501",
+    "S101",
+    "D1",
+    "D203",
+    "D204",
+    "D213",
+    "D215",
+    "D400",
+    "D404",
+    "D406",
+    "D407",
+    "D408",
+    "D409",
+    "D413",
+]
+
+[tool.ruff.pyupgrade]
+keep-runtime-typing = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+exclude_lines = [
+  "pragma: no cover",
+  "if TYPE_CHECKING:",
+  "if __name__ == .__main__.:",
+]
+
+[tool.coverage.run]
+branch = true
+parallel = true
+include = ["src/*"]
+
+[tool.pytest.ini_options]
+doctest_optionflags = "NORMALIZE_WHITESPACE IGNORE_EXCEPTION_DETAIL ELLIPSIS"
+addopts = "--doctest-modules -vv --ff --strict-markers"
+norecursedirs = ".* build dist *.egg bin"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
