@@ -10,7 +10,7 @@ A Service.
 
 See the full documentation [here](https://responsaas.readthedocs.io/en/latest/)
 (or more specifically
-[converting from responses](https://responsaas.readthedocs.io/en/latest/converting)).
+[converting from responses](https://responsaas.readthedocs.io/en/latest/converting.html)).
 
 ## Quickstart
 
