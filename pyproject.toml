@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "responsaas"
-version = "0.1.0"
+version = "0.2.0"
 description = ""
 authors = ["DanCardin <ddcardin@gmail.com>"]
 readme = "README.md"
@@ -15,7 +15,10 @@ responses = ">=0.17.0"
 fastapi = "^0.101.1"
 pydantic = "^2.2.0"
 
-pytest-mock-resources = {version = '>=2.8.0', extras = ["docker"], optional = true}
+pytest-mock-resources = {version = '>=2.9.1', extras = ["docker"], optional = true}
+
+[tool.poetry.plugins.pmr]
+responsaas = "responsaas.pytest"
 
 [tool.poetry.extras]
 pmr = ["pytest-mock-resources"]

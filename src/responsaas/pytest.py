@@ -107,9 +107,7 @@ try:
     ):
         @pytest.fixture(scope=scope)
         def responsaas_server(pytestconfig):
-            for _ in get_container(pytestconfig, config):
-                yield config
-            # yield from get_container(pytestconfig, config)
+            yield from get_container(pytestconfig, config)
 
         return responsaas_server
 
