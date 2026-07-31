@@ -1,38 +1,46 @@
-[tool.poetry]
+[project]
 name = "responsaas"
 version = "0.1.0"
 description = ""
-authors = ["DanCardin <ddcardin@gmail.com>"]
+authors = [
+    {name = "DanCardin", email = "ddcardin@gmail.com"},
+]
 readme = "README.md"
-packages = [
-    { from = "src", include = "responsaas" },
+requires-python = ">=3.9"
+dependencies = [
+    "responses>=0.17.0",
+    "fastapi>=0.101.1",
+    "pydantic>=2.2.0",
+    "cappa>=0.32.2",
 ]
 
-[tool.poetry.dependencies]
-python = "^3.8"
+[project.optional-dependencies]
+pmr = ["pytest-mock-resources[docker]>=2.8.0"]
+server = ["uvicorn"]
 
-responses = ">=0.17.0"
-fastapi = "^0.101.1"
-pydantic = "^2.2.0"
+[project.scripts]
+responsaas = "responsaas.__main__:main"
 
-pytest-mock-resources = {version = '>=2.8.0', extras = ["docker"], optional = true}
+[dependency-groups]
+dev = [
+    "black>=23.7.0",
+    "ruff>=0.9.0",
+    "coverage>=6",
+    "types-requests>=2.31.0.2",
+    "mypy>=1.5.1",
+]
 
-[tool.poetry.extras]
-pmr = ["pytest-mock-resources"]
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry.group.server.dependencies]
-uvicorn = "*"
-
-[tool.poetry.group.dev.dependencies]
-black = "^23.7.0"
-ruff = "^0.0.284"
-coverage = ">=6"
-types-requests = "^2.31.0.2"
-mypy = "^1.5.1"
+[tool.hatch.build.targets.wheel]
+packages = ["src/responsaas"]
 
 [tool.ruff]
-target-version = "py38"
+target-version = "py39"
 
+[tool.ruff.lint]
 select = ["C", "D", "E", "F", "I", "N", "Q", "RET", "RUF", "S", "T", "UP", "YTT"]
 ignore = [
     "C901",
@@ -52,9 +60,6 @@ ignore = [
     "D413",
 ]
 
-[tool.ruff.pyupgrade]
-keep-runtime-typing = true
-
 [tool.coverage.report]
 show_missing = true
 skip_covered = true
@@ -73,7 +78,3 @@ include = ["src/*"]
 doctest_optionflags = "NORMALIZE_WHITESPACE IGNORE_EXCEPTION_DETAIL ELLIPSIS"
 addopts = "--doctest-modules -vv --ff --strict-markers"
 norecursedirs = ".* build dist *.egg bin"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
