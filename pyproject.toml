@@ -2,33 +2,20 @@
 name = "responsaas"
 version = "0.1.0"
 description = ""
-authors = [
-    {name = "DanCardin", email = "ddcardin@gmail.com"},
-]
+authors = [{ name = "DanCardin", email = "ddcardin@gmail.com" }]
 readme = "README.md"
 requires-python = ">=3.9"
-dependencies = [
-    "responses>=0.17.0",
-    "fastapi>=0.101.1",
-    "pydantic>=2.2.0",
-    "cappa>=0.32.2",
-]
+dependencies = ["responses>=0.17.0", "fastapi>=0.101.1", "pydantic>=2.2.0", "cappa>=0.32.2"]
 
 [project.optional-dependencies]
 pmr = ["pytest-mock-resources[docker]>=2.8.0"]
-server = ["uvicorn"]
+server = ["uvicorn", "cloudpickle"]
 
 [project.scripts]
 responsaas = "responsaas.__main__:main"
 
 [dependency-groups]
-dev = [
-    "black>=23.7.0",
-    "ruff>=0.9.0",
-    "coverage>=6",
-    "types-requests>=2.31.0.2",
-    "mypy>=1.5.1",
-]
+dev = ["black>=23.7.0", "ruff>=0.9.0", "coverage>=6", "types-requests>=2.31.0.2", "mypy>=1.5.1"]
 
 [build-system]
 requires = ["hatchling"]
@@ -60,14 +47,15 @@ ignore = [
     "D413",
 ]
 
+[[tool.mypy.overrides]]
+# cloudpickle ships neither inline types nor a stubs package.
+module = ["cloudpickle"]
+ignore_missing_imports = true
+
 [tool.coverage.report]
 show_missing = true
 skip_covered = true
-exclude_lines = [
-  "pragma: no cover",
-  "if TYPE_CHECKING:",
-  "if __name__ == .__main__.:",
-]
+exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:", "if __name__ == .__main__.:"]
 
 [tool.coverage.run]
 branch = true

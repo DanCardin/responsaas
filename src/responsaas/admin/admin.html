@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>responsaas admin</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: monospace;
+      font-size: 13px;
+      background: #1a1a1a;
+      color: #d4d4d4;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: #252526;
+      border-bottom: 1px solid #333;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    header h1 {
+      font-size: 14px;
+      color: #ccc;
+      font-weight: normal;
+    }
+
+    .spacer {
+      flex: 1;
+    }
+
+    .layout {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 220px;
+      background: #252526;
+      border-right: 1px solid #333;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 8px;
+      border-bottom: 1px solid #333;
+      display: flex;
+      gap: 6px;
+    }
+
+    .ns-list {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .ns-item {
+      display: flex;
+      align-items: center;
+      padding: 6px 8px;
+      cursor: pointer;
+      border-bottom: 1px solid #2a2a2a;
+      gap: 6px;
+    }
+
+    .ns-item:hover {
+      background: #2a2d2e;
+    }
+
+    .ns-item.active {
+      background: #094771;
+    }
+
+    .ns-name {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .ns-count {
+      color: #888;
+      font-size: 11px;
+    }
+
+    .ns-del {
+      color: #666;
+      cursor: pointer;
+      padding: 0 2px;
+      display: none;
+    }
+
+    .ns-item:hover .ns-del {
+      display: block;
+    }
+
+    .ns-del:hover {
+      color: #f48771;
+    }
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .main-header {
+      padding: 8px 12px;
+      border-bottom: 1px solid #333;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #252526;
+      flex-shrink: 0;
+    }
+
+    .main-header h2 {
+      font-size: 13px;
+      font-weight: normal;
+      color: #ccc;
+    }
+
+    .route-table-wrap {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      background: #2d2d2d;
+      padding: 6px 10px;
+      text-align: left;
+      border-bottom: 1px solid #333;
+      color: #888;
+      font-weight: normal;
+      font-size: 11px;
+      text-transform: uppercase;
+      position: sticky;
+      top: 0;
+    }
+
+    td {
+      padding: 6px 10px;
+      border-bottom: 1px solid #2a2a2a;
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background: #2a2d2e;
+    }
+
+    .method {
+      font-weight: bold;
+    }
+
+    .method-GET {
+      color: #4ec9b0;
+    }
+
+    .method-POST {
+      color: #dcdcaa;
+    }
+
+    .method-PUT {
+      color: #ce9178;
+    }
+
+    .method-PATCH {
+      color: #c586c0;
+    }
+
+    .method-DELETE {
+      color: #f48771;
+    }
+
+    .method-HEAD,
+    .method-OPTIONS {
+      color: #9cdcfe;
+    }
+
+    .status-2xx {
+      color: #4ec9b0;
+    }
+
+    .status-3xx {
+      color: #dcdcaa;
+    }
+
+    .status-4xx {
+      color: #ce9178;
+    }
+
+    .status-5xx {
+      color: #f48771;
+    }
+
+    .body-preview {
+      color: #888;
+      font-size: 11px;
+      max-width: 300px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .row-actions {
+      white-space: nowrap;
+    }
+
+    .add-form {
+      background: #252526;
+      border-top: 1px solid #333;
+      padding: 12px;
+      flex-shrink: 0;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+
+    .add-form h3 {
+      font-size: 12px;
+      color: #888;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+      align-items: flex-start;
+    }
+
+    .form-row label {
+      color: #888;
+      font-size: 11px;
+      white-space: nowrap;
+      padding-top: 5px;
+      width: 80px;
+      flex: none;
+    }
+
+    .form-row>*:not(label) {
+      flex: 1;
+    }
+
+    input[type=text],
+    input[type=number],
+    select,
+    textarea {
+      background: #3c3c3c;
+      border: 1px solid #555;
+      color: #d4d4d4;
+      padding: 4px 7px;
+      font-family: monospace;
+      font-size: 12px;
+      border-radius: 2px;
+      width: 100%;
+    }
+
+    input[type=text]:focus,
+    input[type=number]:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #007acc;
+    }
+
+    select {
+      height: 26px;
+    }
+
+    .form-inline {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .form-inline input[type=text],
+    .form-inline select {
+      flex: 1;
+    }
+
+    .btn {
+      background: #0e639c;
+      color: #fff;
+      border: none;
+      padding: 4px 10px;
+      cursor: pointer;
+      font-family: monospace;
+      font-size: 12px;
+      border-radius: 2px;
+    }
+
+    .btn:hover {
+      background: #1177bb;
+    }
+
+    .btn-sm {
+      padding: 2px 7px;
+      font-size: 11px;
+    }
+
+    .btn-danger {
+      background: #6e2828;
+    }
+
+    .btn-danger:hover {
+      background: #8b3333;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: #888;
+      border: 1px solid #555;
+    }
+
+    .btn-ghost:hover {
+      background: #3c3c3c;
+      color: #d4d4d4;
+    }
+
+    .form-subsection {
+      margin-top: 10px;
+      padding-left: 88px;
+    }
+
+    .form-subsection-label {
+      font-size: 11px;
+      color: #888;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      margin-left: -88px;
+    }
+
+    .matcher-entry {
+      background: #2d2d2d;
+      border: 1px solid #444;
+      border-radius: 2px;
+      margin-bottom: 6px;
+      padding: 6px;
+    }
+
+    .matcher-entry-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+      font-size: 11px;
+      color: #888;
+    }
+
+    .CodeMirror {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      border: 1px solid #555;
+      font-family: monospace;
+      font-size: 12px;
+      height: auto;
+    }
+
+    .CodeMirror-scroll {
+      min-height: 60px;
+      max-height: 200px;
+    }
+
+    .empty-state {
+      padding: 40px;
+      text-align: center;
+      color: #555;
+    }
+
+    .load-form {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .load-form input {
+      width: 240px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #2d2d2d;
+      border: 1px solid #444;
+      padding: 8px 14px;
+      border-radius: 3px;
+      font-size: 12px;
+      z-index: 9999;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
+    .toast.error {
+      border-color: #f48771;
+      color: #f48771;
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 10000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal {
+      background: #252526;
+      border: 1px solid #444;
+      border-radius: 3px;
+      width: 560px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-bottom: 1px solid #333;
+      gap: 8px;
+    }
+
+    .modal-header h3 {
+      flex: 1;
+      font-size: 13px;
+      font-weight: normal;
+    }
+
+    .modal-body {
+      padding: 12px;
+      overflow-y: auto;
+    }
+
+    .run-request {
+      font-size: 11px;
+      color: #888;
+      margin-bottom: 10px;
+    }
+
+    .run-status {
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    .run-response-body {
+      background: #1e1e1e;
+      border: 1px solid #444;
+      padding: 8px;
+      border-radius: 2px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      font-size: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .run-form {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .run-form-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .run-form-row label {
+      width: 60px;
+      font-size: 11px;
+      color: #888;
+      flex: none;
+    }
+
+    .run-form-row input,
+    .run-form-row textarea,
+    .run-form-row select {
+      flex: 1;
+    }
+
+    .run-form-row textarea {
+      resize: vertical;
+    }
+  </style>
+</head>
+
+<body x-data="app()" x-init="init()">
+
+  <header>
+    <h1>responsaas admin</h1>
+    <div class="spacer"></div>
+    <div class="load-form">
+      <input type="text" x-model="loadPath" placeholder="/path/to/config.py" @keydown.enter="loadConfig()">
+      <button class="btn btn-ghost btn-sm" @click="loadConfig()">Load file</button>
+    </div>
+    <button class="btn btn-ghost btn-sm" :disabled="!selectedNs" @click="exportNamespace()">Export</button>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <input type="text" x-model="newNsName" placeholder="namespace name" style="flex:1" @keydown.enter="createNamespace()">
+        <button class="btn btn-sm" @click="createNamespace()">+</button>
+      </div>
+      <div class="ns-list">
+        <template x-for="ns in namespaces" :key="ns.name">
+          <div class="ns-item" :class="{ active: selectedNs === ns.name }" @click="selectNamespace(ns.name)">
+            <span class="ns-name" x-text="ns.name" :title="ns.name"></span>
+            <span class="ns-count" x-text="ns.route_count"></span>
+            <span class="ns-del" @click.stop="deleteNamespace(ns.name)">&#x2715;</span>
+          </div>
+        </template>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="main-header">
+        <h2 x-text="selectedNs || 'Select a namespace'"></h2>
+        <div class="spacer"></div>
+        <span style="color:#888;font-size:11px" x-text="selectedNs && routes.length ? routes.length + ' route' + (routes.length !== 1 ? 's' : '') : ''"></span>
+      </div>
+      <div class="route-table-wrap">
+        <div class="empty-state" x-show="!selectedNs">No namespace selected</div>
+        <div class="empty-state" x-show="selectedNs && !routes.length">No routes. Add one below.</div>
+        <table x-show="routes.length">
+          <thead>
+            <tr>
+              <th>Method</th><th>URL</th><th>Status</th><th>Body</th><th>Extras</th><th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <template x-for="(r, i) in routes" :key="i">
+              <tr>
+                <td><span :class="'method method-' + r.method" x-text="r.method"></span></td>
+                <td x-text="r.url_pattern ? '~' + r.url_pattern : (r.url || '')"></td>
+                <td><span :class="statusClass(r.status || 200)" x-text="r.status || 200"></span></td>
+                <td class="body-preview" x-text="r.json ? JSON.stringify(r.json).slice(0, 80) : (r.body || '')"></td>
+                <td style="color:#666;font-size:11px" x-text="[r.match_source?.length ? r.match_source.length + ' matcher(s)' : null, r.callback_source ? 'callback' : null].filter(Boolean).join(', ')"></td>
+                <td class="row-actions">
+                  <button x-show="r.url" class="btn btn-ghost btn-sm" @click="openRunModal(r.method, r.url)">run</button>
+                  <button class="btn btn-ghost btn-sm" @click="editRoute(i)">edit</button>
+                  <button class="btn btn-danger btn-sm" @click="deleteRoute(i)">del</button>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="add-form" x-show="selectedNs">
+        <h3 x-text="editIndex !== null ? 'Edit route #' + editIndex : 'Add route'"></h3>
+        <div class="form-row">
+          <label>Method</label>
+          <div class="form-inline">
+            <select x-model="form.method">
+              <option>GET</option><option>POST</option><option>PUT</option>
+              <option>PATCH</option><option>DELETE</option><option>HEAD</option><option>OPTIONS</option>
+            </select>
+            <input type="text" x-model="form.url" placeholder="URL or leave blank for regex" style="flex:3">
+            <input type="number" x-model="form.status" style="width:70px;flex:none">
+          </div>
+        </div>
+        <div class="form-row">
+          <label>URL regex</label>
+          <input type="text" x-model="form.urlPattern" placeholder="e.g. ^/api/.*$  (leave blank for plain URL)">
+        </div>
+        <div class="form-row">
+          <label>Body</label>
+          <div>
+            <select x-model="form.bodyType" style="margin-bottom:4px;width:auto">
+              <option value="none">none</option>
+              <option value="json">JSON</option>
+              <option value="text">text</option>
+            </select>
+            <textarea x-model="form.body" rows="3" x-show="form.bodyType !== 'none'"
+              :placeholder="form.bodyType === 'json' ? '{&quot;key&quot;: &quot;value&quot;}' : 'response body text'"></textarea>
+          </div>
+        </div>
+        <div class="form-row">
+          <label>Headers</label>
+          <textarea x-model="form.headers" rows="2" placeholder='{"Content-Type": "application/json"}'></textarea>
+        </div>
+
+        <div class="form-subsection">
+          <div class="form-subsection-label">Matchers <span style="color:#666;font-size:11px">— assign <code>matcher</code>; <code>matchers</code> module available</span></div>
+          <template x-for="(m, i) in matchers" :key="m.id">
+            <div class="matcher-entry">
+              <div class="matcher-entry-header">
+                <span x-text="'matcher ' + (i + 1)"></span>
+                <button class="btn btn-danger btn-sm" @click="removeMatcher(m.id)">remove</button>
+              </div>
+              <div :id="'me-' + m.id" x-init="$nextTick(() => initMatcherEditor(m.id, m.source))"></div>
+            </div>
+          </template>
+          <button class="btn btn-ghost btn-sm" @click="addMatcher()">+ Add matcher</button>
+        </div>
+
+        <div class="form-subsection">
+          <div class="form-subsection-label">Callback <span style="color:#666;font-size:11px">— define <code>callback(request)</code> returning <code>(status, headers, body)</code></span></div>
+          <div id="callback-editor-wrap" x-show="showCallback"></div>
+          <button class="btn btn-ghost btn-sm" x-show="!showCallback" @click="addCallback()">+ Add callback</button>
+        </div>
+
+        <br>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn" @click="submitRoute()" x-text="editIndex !== null ? 'Save changes' : 'Add route'"></button>
+          <button class="btn btn-ghost" @click="cancelEdit()">Cancel</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" :class="{ show: toastMsg, error: toastError }" x-text="toastMsg"></div>
+
+  <div class="modal-overlay" :class="{ show: runModal.show }" @click.self="runModal.show = false" @keydown.escape.window="runModal.show = false">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 x-text="runModal.method + ' ' + runModal.url"></h3>
+        <button class="btn btn-ghost btn-sm" @click="runModal.show = false">&#x2715;</button>
+      </div>
+      <div class="modal-body">
+        <div class="run-form">
+          <div class="run-form-row">
+            <label>Method</label>
+            <select x-model="runModal.method">
+              <option>GET</option><option>POST</option><option>PUT</option>
+              <option>PATCH</option><option>DELETE</option><option>HEAD</option><option>OPTIONS</option>
+            </select>
+          </div>
+          <div class="run-form-row">
+            <label>URL</label>
+            <input type="text" x-model="runModal.url" placeholder="/path">
+          </div>
+          <div class="run-form-row">
+            <label>Body</label>
+            <textarea x-model="runModal.body" rows="3" placeholder='{"key": "value"} or leave blank'></textarea>
+          </div>
+          <div class="run-form-row">
+            <label></label>
+            <button class="btn btn-sm" @click="execRun()">Send</button>
+          </div>
+        </div>
+        <template x-if="runModal.result">
+          <div>
+            <div class="run-request" x-text="runModal.method + ' /' + selectedNs + runModal.url"></div>
+            <div class="run-status" :class="statusClass(runModal.result.status)" x-text="runModal.result.status + ' ' + runModal.result.statusText"></div>
+            <div class="run-response-body" x-text="runModal.result.body"></div>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const BASE = '/__responsaas__/admin';
+
+    // CodeMirror instances live outside Alpine to avoid reactive proxying.
+    const matcherEditors = {};
+    let callbackEditor = null;
+    let matcherIdCounter = 0;
+
+    function cmEditor(el, value) {
+      return CodeMirror(typeof el === 'string' ? document.getElementById(el) : el, {
+        mode: 'python', lineNumbers: true,
+        indentUnit: 4, tabSize: 4, indentWithTabs: false,
+        value: value || '',
+        viewportMargin: Infinity,
+      });
+    }
+
+    function app() {
+      return {
+        namespaces: [],
+        routes: [],
+        selectedNs: null,
+        editIndex: null,
+        newNsName: '',
+        loadPath: '',
+        toastMsg: '',
+        toastError: false,
+        toastTimeout: null,
+        matchers: [],
+        showCallback: false,
+        form: { method: 'GET', url: '', urlPattern: '', status: 200, bodyType: 'none', body: '', headers: '' },
+        runModal: { show: false, method: 'GET', url: '', body: '', result: null },
+
+        async init() {
+          await this.loadNamespaces();
+        },
+
+        async api(method, path, body) {
+          const opts = { method, headers: { 'Content-Type': 'application/json' } };
+          if (body !== undefined) opts.body = JSON.stringify(body);
+          const r = await fetch(BASE + path, opts);
+          if (!r.ok) {
+            const msg = await r.text().catch(() => r.statusText);
+            throw new Error(msg);
+          }
+          if (r.status === 204) return null;
+          const ct = r.headers.get('content-type') || '';
+          return ct.includes('application/json') ? r.json() : r.text();
+        },
+
+        toast(msg, isError = false) {
+          if (this.toastTimeout) clearTimeout(this.toastTimeout);
+          this.toastMsg = msg;
+          this.toastError = isError;
+          this.toastTimeout = setTimeout(() => { this.toastMsg = ''; }, 2500);
+        },
+
+        statusClass(s) {
+          if (!s || s >= 500) return 'status-5xx';
+          if (s >= 400) return 'status-4xx';
+          if (s >= 300) return 'status-3xx';
+          return 'status-2xx';
+        },
+
+        async loadNamespaces() {
+          try {
+            this.namespaces = await this.api('GET', '/namespaces');
+          } catch (e) { this.toast('Error loading namespaces: ' + e.message, true); }
+        },
+
+        async createNamespace() {
+          const name = this.newNsName.trim();
+          if (!name) return;
+          try {
+            await this.api('POST', '/namespaces', { name });
+            this.newNsName = '';
+            await this.loadNamespaces();
+            await this.selectNamespace(name);
+          } catch (e) { this.toast(e.message, true); }
+        },
+
+        async deleteNamespace(name) {
+          if (!confirm('Delete namespace "' + name + '"?')) return;
+          try {
+            await this.api('DELETE', '/namespaces/' + encodeURIComponent(name));
+            if (this.selectedNs === name) { this.selectedNs = null; this.routes = []; }
+            await this.loadNamespaces();
+          } catch (e) { this.toast(e.message, true); }
+        },
+
+        async selectNamespace(name) {
+          this.selectedNs = name;
+          this.editIndex = null;
+          this.clearForm();
+          await this.loadNamespaces();
+          await this.loadRoutes();
+        },
+
+        async loadRoutes() {
+          if (!this.selectedNs) return;
+          try {
+            this.routes = await this.api('GET', '/namespaces/' + encodeURIComponent(this.selectedNs) + '/routes');
+          } catch (e) { this.toast('Error loading routes: ' + e.message, true); }
+        },
+
+        async deleteRoute(index) {
+          try {
+            await this.api('DELETE', '/namespaces/' + encodeURIComponent(this.selectedNs) + '/routes/' + index);
+            await this.loadRoutes();
+            await this.loadNamespaces();
+          } catch (e) { this.toast(e.message, true); }
+        },
+
+        async editRoute(index) {
+          try {
+            const routes = await this.api('GET', '/namespaces/' + encodeURIComponent(this.selectedNs) + '/routes');
+            const r = routes[index];
+            this.editIndex = index;
+            this.form.method = r.method || 'GET';
+            this.form.url = r.url || '';
+            this.form.urlPattern = r.url_pattern || '';
+            this.form.status = r.status || 200;
+            this.form.headers = r.headers ? JSON.stringify(r.headers, null, 2) : '';
+            if (r.json != null) {
+              this.form.bodyType = 'json';
+              this.form.body = JSON.stringify(r.json, null, 2);
+            } else if (r.body != null) {
+              this.form.bodyType = 'text';
+              this.form.body = r.body;
+            } else {
+              this.form.bodyType = 'none';
+              this.form.body = '';
+            }
+
+            Object.keys(matcherEditors).forEach(id => delete matcherEditors[id]);
+            this.matchers = (r.match_source || []).map(source => ({ id: ++matcherIdCounter, source }));
+
+            const cbSrc = r.callback_source || null;
+            this.showCallback = !!cbSrc;
+            this.$nextTick(() => {
+              if (cbSrc) {
+                const el = document.getElementById('callback-editor-wrap');
+                if (!callbackEditor) {
+                  el.innerHTML = '';
+                  callbackEditor = cmEditor(el, cbSrc);
+                } else {
+                  callbackEditor.setValue(cbSrc);
+                }
+              } else {
+                callbackEditor = null;
+              }
+            });
+
+            document.querySelector('.add-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+          } catch (e) { this.toast(e.message, true); }
+        },
+
+        cancelEdit() {
+          this.editIndex = null;
+          this.clearForm();
+        },
+
+        clearForm() {
+          this.form = { method: 'GET', url: '', urlPattern: '', status: 200, bodyType: 'none', body: '', headers: '' };
+          Object.keys(matcherEditors).forEach(id => delete matcherEditors[id]);
+          this.matchers = [];
+          this.showCallback = false;
+          const el = document.getElementById('callback-editor-wrap');
+          if (el) el.innerHTML = '';
+          callbackEditor = null;
+        },
+
+        async submitRoute() {
+          const { method, url, urlPattern, status, bodyType, body, headers } = this.form;
+          const payload = { method, status };
+          if (url.trim()) payload.url = url.trim();
+          if (urlPattern.trim()) payload.url_pattern = urlPattern.trim();
+          if (bodyType === 'json' && body.trim()) {
+            try { payload.json = JSON.parse(body); }
+            catch (e) { this.toast('Invalid JSON body: ' + e.message, true); return; }
+          } else if (bodyType === 'text' && body.trim()) {
+            payload.body = body;
+          }
+          if (headers.trim()) {
+            try { payload.headers = JSON.parse(headers); }
+            catch (e) { this.toast('Invalid headers JSON: ' + e.message, true); return; }
+          }
+
+          const matchSources = this.matchers
+            .map(m => matcherEditors[m.id]?.getValue().trim())
+            .filter(Boolean);
+          if (matchSources.length) payload.match_source = matchSources;
+
+          const cbSrc = callbackEditor?.getValue().trim();
+          if (cbSrc) payload.callback_source = cbSrc;
+
+          try {
+            const nsPath = '/namespaces/' + encodeURIComponent(this.selectedNs) + '/routes';
+            if (this.editIndex !== null) {
+              await this.api('PUT', nsPath + '/' + this.editIndex, payload);
+              this.toast('Route updated');
+              this.editIndex = null;
+            } else {
+              await this.api('POST', nsPath, payload);
+              this.toast('Route added');
+            }
+            this.clearForm();
+            await this.loadRoutes();
+            await this.loadNamespaces();
+          } catch (e) { this.toast(e.message, true); }
+        },
+
+        initMatcherEditor(id, source) {
+          if (matcherEditors[id]) return;
+          const el = document.getElementById('me-' + id);
+          if (!el) return;
+          matcherEditors[id] = cmEditor(el, source || '# matcher = matchers.query_param_matcher({"key": "value"})');
+        },
+
+        addMatcher(source = '') {
+          this.matchers.push({ id: ++matcherIdCounter, source });
+        },
+
+        removeMatcher(id) {
+          delete matcherEditors[id];
+          this.matchers = this.matchers.filter(m => m.id !== id);
+        },
+
+        addCallback() {
+          this.showCallback = true;
+          this.$nextTick(() => {
+            const el = document.getElementById('callback-editor-wrap');
+            if (!callbackEditor) {
+              el.innerHTML = '';
+              callbackEditor = cmEditor(el, '');
+            }
+          });
+        },
+
+        openRunModal(method, url) {
+          this.runModal = { show: true, method, url, body: '', result: null };
+        },
+
+        async execRun() {
+          const { method, url, body } = this.runModal;
+          if (!url || !this.selectedNs) return;
+          const fullUrl = '/' + this.selectedNs + url;
+          const opts = { method, headers: {} };
+          if (body.trim()) {
+            try { JSON.parse(body); opts.headers['Content-Type'] = 'application/json'; } catch (_) {}
+            opts.body = body;
+          }
+          try {
+            const r = await fetch(fullUrl, opts);
+            const ct = r.headers.get('content-type') || '';
+            const text = await r.text();
+            let display = text;
+            if (ct.includes('application/json')) {
+              try { display = JSON.stringify(JSON.parse(text), null, 2); } catch (_) {}
+            }
+            this.runModal.result = { status: r.status, statusText: r.statusText, body: display };
+          } catch (e) {
+            this.runModal.result = { status: 0, statusText: 'Error: ' + e.message, body: '' };
+          }
+        },
+
+        async loadConfig() {
+          const path = this.loadPath.trim();
+          if (!path) return;
+          try {
+            await this.api('POST', '/load', { path });
+            this.toast('Config loaded');
+            await this.loadNamespaces();
+            if (this.selectedNs) await this.loadRoutes();
+          } catch (e) { this.toast(e.message, true); }
+        },
+
+        exportNamespace() {
+          if (!this.selectedNs) return;
+          const a = document.createElement('a');
+          a.href = BASE + '/export/' + encodeURIComponent(this.selectedNs);
+          a.download = this.selectedNs + '.py';
+          a.click();
+        },
+      };
+    }
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js"></script>
+</body>
+
+</html>

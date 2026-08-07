@@ -7,7 +7,7 @@ import pickle
 from dataclasses import dataclass, field
 from functools import partialmethod
 from re import Pattern
-from typing import Any, Dict, List, Literal, Optional, Tuple, Union
+from typing import Any, Literal, Union
 
 import requests
 from responses import matchers
@@ -25,7 +25,7 @@ class ResponsaasClient:
     session: requests.Session = field(default_factory=requests.Session)
     timeout: int = 10
 
-    def _make_call(self, endpoint, *, json={}, namespace_id: Optional[str] = None):
+    def _make_call(self, endpoint, *, json={}, namespace_id: str | None = None):
         if namespace_id:
             json = {**json, "namespace_id": namespace_id}
 
@@ -144,13 +144,13 @@ class Responsaas(ResponsaasClient):
         self,
         action: str,
         method: str,
-        url: Optional[URLPatternType],
-        content_type: Optional[str] = None,
-        headers: Optional[Dict[str, str]] = None,
-        body: Optional[bytes] = None,
-        json: Optional[Any] = None,
-        status: Optional[int] = None,
-        match: Optional[List[Tuple[str, Any]]] = None,
+        url: URLPatternType | None,
+        content_type: str | None = None,
+        headers: dict[str, str] | None = None,
+        body: bytes | None = None,
+        json: Any | None = None,
+        status: int | None = None,
+        match: list[tuple[str, Any]] | None = None,
     ):
         matchers = None
         if match:

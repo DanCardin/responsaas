@@ -3,7 +3,7 @@
 PACKAGE_VERSION = $(shell grep '^version' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
 
 install:
-	uv sync --extra pmr --extra server
+	uv sync --all-extras
 
 test:
 	uv run coverage run -m pytest src tests

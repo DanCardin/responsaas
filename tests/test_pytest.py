@@ -9,7 +9,7 @@ from responsaas.pytest import (
 def test_no_base_url():
     fixture = create_responsaas_fixture()
     with pytest.raises(ValueError):
-        next(fixture.__pytest_wrapped__.obj(None))
+        next(fixture._get_wrapped_function()(None))
 
 
 def test_with_base_url():
@@ -17,7 +17,7 @@ def test_with_base_url():
 
     # This implies it's actually attempting to connect
     with pytest.raises(requests.exceptions.ConnectionError):
-        next(fixture.__pytest_wrapped__.obj(None))
+        next(fixture._get_wrapped_function()(None))
 
 
 def test_with_string_fixture():
@@ -25,4 +25,4 @@ def test_with_string_fixture():
 
     # This implies it's actually attempting to connect
     with pytest.raises(requests.exceptions.ConnectionError):
-        next(fixture.__pytest_wrapped__.obj("http://localhost"))
+        next(fixture._get_wrapped_function()("http://localhost"))

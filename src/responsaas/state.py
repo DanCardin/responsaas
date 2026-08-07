@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import uuid
 from dataclasses import dataclass, field
-from typing import Annotated, Any, Dict, List, Optional
+from typing import Annotated, Any
 
 from fastapi import Depends, HTTPException, Request
 from requests.adapters import HTTPAdapter
@@ -13,21 +13,28 @@ from responses import RequestsMock
 class Namespace:
     id: str
     responses: RequestsMock
-    route_history: List[Any] = field(default_factory=list)
+    route_history: list[Any] = field(default_factory=list)
 
 
 @dataclass
 class State:
-    namespaces: Dict[str, Namespace] = field(default_factory=dict)
+    namespaces: dict[str, Namespace] = field(default_factory=dict)
     http_adapter: HTTPAdapter = field(default_factory=HTTPAdapter)
 
     def reset(self):
         self.namespaces = {}
         self.http_adapter = HTTPAdapter()
 
-    def create_namespace(self, namespace_id: Optional[str] = None, assert_all_requests_are_fired: bool = False) -> str:
+    def create_namespace(
+        self,
+        namespace_id: str | None = None,
+        assert_all_requests_are_fired: bool = False,
+    ) -> str:
         namespace_id = namespace_id or str(uuid.uuid4())
-        self.namespaces[namespace_id] = Namespace(namespace_id, RequestsMock(assert_all_requests_are_fired=assert_all_requests_are_fired))
+        self.namespaces[namespace_id] = Namespace(
+            namespace_id,
+            RequestsMock(assert_all_requests_are_fired=assert_all_requests_are_fired),
+        )
         return namespace_id
 
     def get_namespace(self, namespace_id: str):

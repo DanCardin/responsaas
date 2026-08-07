@@ -4,7 +4,7 @@ import base64
 import json
 import pickle
 import re
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
@@ -20,18 +20,19 @@ class NamespaceId(BaseModel):
 
 
 class Route(NamespaceId):
-    url: Optional[str] = None
-    pattern: Optional[str] = None
-    url_pattern: Optional[str] = None
-    method: Optional[str] = "GET"
-    content_type: Optional[str] = None
-    headers: Optional[Dict[str, str]] = None
-    body: Optional[bytes] = None
-    json_body: Optional[Any] = Field(None, alias="json")
-    status: Optional[int] = Field(None)
-    match: Optional[List[Tuple[str, Any]]] = None
-    match_source: Optional[List[str]] = None
-    callback_source: Optional[str] = None
+    url: str | None = None
+    pattern: str | None = None
+    url_pattern: str | None = None
+    method: str | None = "GET"
+    content_type: str | None = None
+    headers: dict[str, str] | None = None
+    body: bytes | None = None
+    json_body: Any | None = Field(None, alias="json")
+    status: int | None = Field(None)
+    match: list[tuple[str, Any]] | None = None
+    match_source: list[str] | None = None
+    callback_source: str | None = None
+    callback_pickle: str | None = None
 
 
 class CallCount(NamespaceId):
@@ -39,19 +40,25 @@ class CallCount(NamespaceId):
 
 
 def eval_matcher_source(source: str) -> Any:
-    local: Dict[str, Any] = {}
+    local: dict[str, Any] = {}
     exec(source, {"matchers": matchers, "re": re}, local)  # noqa: S102
     return local["matcher"]
 
 
 def eval_callback_source(source: str) -> Any:
     # Single dict for globals+locals so `global count` style state survives across calls.
-    ns: Dict[str, Any] = {"json": json, "__builtins__": __builtins__}
+    ns: dict[str, Any] = {"json": json, "__builtins__": __builtins__}
     exec(source, ns)  # noqa: S102
     return ns["callback"]
 
 
-def collect_responses_kwargs(payload: Route) -> Dict[str, Any]:
+def eval_callback_pickle(b64: str) -> Any:
+    import cloudpickle
+
+    return cloudpickle.loads(base64.b64decode(b64.encode()))
+
+
+def collect_responses_kwargs(payload: Route) -> dict[str, Any]:
     if payload.url_pattern:
         url: Any = re.compile(payload.url_pattern)
     elif payload.pattern:
@@ -61,7 +68,7 @@ def collect_responses_kwargs(payload: Route) -> Dict[str, Any]:
     else:
         url = payload.url
 
-    kwargs: Dict[str, Any] = {
+    kwargs: dict[str, Any] = {
         "method": payload.method,
         "url": url,
     }
@@ -81,7 +88,7 @@ def collect_responses_kwargs(payload: Route) -> Dict[str, Any]:
     if payload.content_type is not None:
         kwargs["content_type"] = payload.content_type
 
-    match_list: List[Any] = []
+    match_list: list[Any] = []
 
     if payload.match is not None:
         for matcher, *match_args in payload.match:
@@ -109,7 +116,7 @@ def _apply_route(mock: Any, action: str, payload: Route) -> None:
             url = payload.url
         match_list = [eval_matcher_source(s) for s in (payload.match_source or [])]
         cb = CallbackResponse(
-            method=payload.method,
+            method=payload.method or "GET",
             url=url,
             callback=fn,
             match=match_list,

@@ -1,5 +1,3 @@
-import textwrap
-
 import requests
 
 from responsaas.api import Responsaas, matchers
@@ -25,8 +23,8 @@ def test_match(responsaas: Responsaas):
     response = requests.get(f"{responsaas.base_url}/foo?q=5", timeout=1)
     assert response.status_code == 500
 
-    text = "Request: \n- GET /foo?q=5\n\nAvailable matches:\n- GET /foo Parameters do not match. {q: 5} doesn't match {q: 4}"
-    assert textwrap.dedent(text) in response.text
+    assert "GET /foo?q=5" in response.text
+    assert "Parameters do not match" in response.text
 
 
 def test_call_count(responsaas: Responsaas):

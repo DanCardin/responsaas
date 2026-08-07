@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Optional
-
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 
@@ -11,7 +9,7 @@ router = APIRouter()
 
 
 class EnterNamespace(BaseModel):
-    assert_all_requests_are_fired: Optional[bool] = False
+    assert_all_requests_are_fired: bool | None = False
 
 
 class NamespaceId(BaseModel):

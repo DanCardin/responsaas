@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated
 
 import cappa
 import uvicorn
@@ -13,11 +13,19 @@ import uvicorn
 @dataclass
 class Responsaas:
     config: Annotated[
-        Optional[Path | None],
-        cappa.Arg(default=cappa.Env("RESPONSAAS_CONFIG"), long="--config", help="Path to Python config file (sets RESPONSAAS_CONFIG)"),
+        Path | None,
+        cappa.Arg(
+            default=cappa.Env("RESPONSAAS_CONFIG"),
+            long="--config",
+            help="Path to Python config file (sets RESPONSAAS_CONFIG)",
+        ),
     ] = None
-    host: Annotated[str, cappa.Arg(long="--host", default=cappa.Env("RESPONSAAS_HOST"))] = "0.0.0.0"
-    port: Annotated[int, cappa.Arg(long="--port", default=cappa.Env("RESPONSAAS_HOST"))] = 7564
+    host: Annotated[
+        str, cappa.Arg(long="--host", default=cappa.Env("RESPONSAAS_HOST"))
+    ] = "0.0.0.0"  # noqa: S104
+    port: Annotated[
+        int, cappa.Arg(long="--port", default=cappa.Env("RESPONSAAS_HOST"))
+    ] = 7564
     reload: Annotated[
         bool,
         cappa.Arg(default=False, long="--reload", action=cappa.ArgAction.store_true),
