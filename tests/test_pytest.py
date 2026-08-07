@@ -1,5 +1,6 @@
 import pytest
 import requests.exceptions
+
 from responsaas.pytest import (
     create_responsaas_fixture,
 )

@@ -1,5 +1,5 @@
+from collections.abc import Generator
 from typing import (
-    Generator,
     Literal,
     Optional,
     Protocol,
@@ -97,9 +97,7 @@ try:
                 requests.post(self.base_url + "/check", timeout=10)
             except requests.exceptions.RequestException:
                 raise ContainerCheckFailed(
-                    "Unable to connect to a presumed responsaas test container via given config: {}".format(
-                        self
-                    )
+                    f"Unable to connect to a presumed responsaas test container via given config: {self}"
                 )
 
     def create_responsaas_server_fixture(
@@ -118,8 +116,8 @@ except ImportError:  # pragma: no cover
 
 
 __all__ = [
-    "create_responsaas_fixture",
-    "create_responsaas_server_fixture",
     "ResponsaasConfig",
     "Scope",
+    "create_responsaas_fixture",
+    "create_responsaas_server_fixture",
 ]

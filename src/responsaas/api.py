@@ -182,7 +182,7 @@ class Responsaas(ResponsaasClient):
 
 
 __all__ = [
-    "matchers",
-    "ResponsaasServer",
     "Responsaas",
+    "ResponsaasServer",
+    "matchers",
 ]
