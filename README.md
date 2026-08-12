@@ -1,7 +1,7 @@
 # Responsaas
 
 [![Actions Status](https://github.com/DanCardin/responsaas/actions/workflows/test.yml/badge.svg)](https://github.com/dancardin/responsaas/actions)
-[![Coverage Status](https://coveralls.io/repos/github/DanCardin/responsaas/badge.svg?branch=main)](https://coveralls.io/github/DanCardin/responsaas?branch=main)
+[![Coverage Status](https://codecov.io/gh/DanCardin/responsaas/branch/main/graph/badge.svg)](https://codecov.io/gh/DanCardin/responsaas)
 [![Documentation Status](https://readthedocs.org/projects/responsaas/badge/?version=latest)](https://responsaas.readthedocs.io/en/latest/?badge=latest)
 [![Docker](https://img.shields.io/docker/cloud/build/dancardin/responsaas?label=Docker&style=flat)](https://hub.docker.com/r/dancardin/responsaas)
 
@@ -11,6 +11,15 @@ A Service.
 See the full documentation [here](https://responsaas.readthedocs.io/en/latest/)
 (or more specifically
 [converting from responses](https://responsaas.readthedocs.io/en/latest/converting.html)).
+
+## Admin UI
+
+responsaas includes a web UI for creating and managing named mock namespaces, adding routes
+with JSON bodies, matchers, and callbacks, and exporting configuration as Python.
+
+![responsaas admin UI](admin.png)
+
+Start the server and open `http://localhost:7564/__responsaas__/admin/`.
 
 ## Quickstart
 

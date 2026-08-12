@@ -3,11 +3,10 @@ from __future__ import annotations
 import logging
 from json import JSONDecodeError
 
-from fastapi import Request, Response
+from fastapi import APIRouter, Request, Response
 from requests import PreparedRequest
-from requests.adapters import HTTPAdapter
 
-from responsaas.main import app, state
+from responsaas.state import StateDep
 
 log = logging.getLogger(__name__)
 
@@ -16,20 +15,21 @@ log = logging.getLogger(__name__)
 # more points of failure.
 HOST_PREFIX = "http://_/"
 
+router = APIRouter()
 
 url = "/{namespace_id:str}/{url:path}"
 
 
-@app.get(url)
-@app.post(url)
-@app.put(url)
-@app.patch(url)
-@app.delete(url)
-@app.head(url)
-@app.options(url)
-async def handler(namespace_id: str, request: Request):
+@router.get(url)
+@router.post(url)
+@router.put(url)
+@router.patch(url)
+@router.delete(url)
+@router.head(url)
+@router.options(url)
+async def handler(namespace_id: str, request: Request, state: StateDep):
     namespace = state.get_namespace(namespace_id)
-    adapter: HTTPAdapter = state.http_adapter
+    adapter = state.http_adapter
 
     json = None
     body = None
@@ -43,7 +43,7 @@ async def handler(namespace_id: str, request: Request):
         except Exception:
             body = await request.body()
 
-    url = "/" + request.path_params.get("url", "")
+    url_path = "/" + request.path_params.get("url", "")
 
     prepared_request = PreparedRequest()
 
@@ -58,7 +58,7 @@ async def handler(namespace_id: str, request: Request):
     )
 
     assert prepared_request.url
-    prepared_request.url = url + prepared_request.url.removeprefix(HOST_PREFIX)
+    prepared_request.url = url_path + prepared_request.url.removeprefix(HOST_PREFIX)
 
     response = namespace.responses._on_request(
         adapter=adapter, request=prepared_request

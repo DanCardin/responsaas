@@ -1,10 +1,3 @@
-from responsaas.routes import namespace, route
+from responsaas.routes import handler, namespace, route
 
-# isort: split
-from responsaas.routes import handler
-
-__all__ = [
-    "namespace",
-    "route",
-    "handler",
-]
+__all__ = ["handler", "namespace", "route"]
