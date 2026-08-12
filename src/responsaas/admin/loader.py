@@ -149,8 +149,13 @@ class AdminRoutePayload(BaseModel):
 
 
 def apply_admin_route(mock: RequestsMock, payload: AdminRoutePayload) -> None:
-    if payload.callback_source or payload.callback_pickle:
-        fn = eval_callback_pickle(payload.callback_pickle) if payload.callback_pickle else eval_callback_source(payload.callback_source)  # type: ignore[arg-type]
+    if payload.callback_pickle or payload.callback_source:
+        if payload.callback_pickle:
+            fn = eval_callback_pickle(payload.callback_pickle)
+
+        if payload.callback_source:
+            fn = eval_callback_source(payload.callback_source)
+
         url: Any = (
             re.compile(payload.url_pattern) if payload.url_pattern else payload.url
         )

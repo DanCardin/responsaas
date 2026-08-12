@@ -1,6 +1,6 @@
 [project]
 name = "responsaas"
-version = "0.1.0"
+version = "0.2.0"
 description = ""
 authors = [{ name = "DanCardin", email = "ddcardin@gmail.com" }]
 readme = "README.md"
@@ -15,7 +15,7 @@ server = ["uvicorn", "cloudpickle"]
 responsaas = "responsaas.__main__:main"
 
 [dependency-groups]
-dev = ["black>=23.7.0", "ruff>=0.9.0", "coverage>=6", "types-requests>=2.31.0.2", "mypy>=1.5.1"]
+dev = ["ruff>=0.16.2", "coverage>=6", "types-requests>=2.31.0.2", "mypy>=1.5.1"]
 
 [build-system]
 requires = ["hatchling"]
@@ -26,6 +26,8 @@ packages = ["src/responsaas"]
 
 [tool.ruff]
 target-version = "py39"
+
+[tool.ruff.format]
 
 [tool.ruff.lint]
 select = ["C", "D", "E", "F", "I", "N", "Q", "RET", "RUF", "S", "T", "UP", "YTT"]
