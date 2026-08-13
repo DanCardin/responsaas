@@ -13,12 +13,12 @@ test:
 
 lint:
 	uv run ruff check src tests || exit 1
+	uv run ruff format --check src tests || exit 1
 	uv run mypy src tests || exit 1
-	uv run black --check --diff src tests || exit 1
 
 format:
 	uv run ruff check --fix src tests
-	uv run black src tests
+	uv run ruff format src tests
 
 build: build39 build310 build311 build312
 
