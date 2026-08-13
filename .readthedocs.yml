@@ -4,14 +4,10 @@ build:
   os: ubuntu-24.04
   tools:
     python: "3.12"
-    uv: latest
+  jobs:
+    install:
+      - pip install uv
+      - uv pip install --system ".[docs]"
 
 sphinx:
   configuration: docs/source/conf.py
-
-python:
-  install:
-    - method: pip
-      path: .
-      extra_requirements:
-        - docs
