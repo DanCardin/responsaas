@@ -10,6 +10,17 @@ dependencies = ["responses>=0.17.0", "fastapi>=0.101.1", "pydantic>=2.2.0", "cap
 [project.optional-dependencies]
 pmr = ["pytest-mock-resources[docker]>=2.8.0"]
 server = ["uvicorn", "cloudpickle"]
+docs = [
+    "furo",
+    "linkify-it-py",
+    "myst-parser[linkify]",
+    "sphinx>=4.5.0",
+    "sphinx-autoapi",
+    "sphinx-autobuild",
+    "sphinx-autodoc-typehints",
+    "sphinx-copybutton",
+    "sphinx-pyproject>=0.3.0",
+]
 
 [project.scripts]
 responsaas = "responsaas.__main__:main"
