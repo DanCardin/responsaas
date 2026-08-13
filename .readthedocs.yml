@@ -7,7 +7,7 @@ build:
   jobs:
     install:
       - pip install uv
-      - uv pip install --system ".[docs]"
+      - uv pip install --python $READTHEDOCS_VIRTUALENV_PATH ".[docs]"
 
 sphinx:
   configuration: docs/source/conf.py
