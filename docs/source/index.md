@@ -6,6 +6,7 @@
 ```{toctree}
 :hidden:
 
+Seed / Config Files <config>
 Converting from responses <converting>
 API <api>
 ```

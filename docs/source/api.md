@@ -2,7 +2,7 @@
 
 ```{eval-rst}
 .. autoapimodule:: responsaas
-   :members: Responsaas, matchers
+   :members: Responsaas, matchers, namespace
 ```
 
 ```{eval-rst}
